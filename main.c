@@ -5,8 +5,8 @@
 #include <stdlib.h>
 #include <time.h>
 
-const int SCR_WIDTH = 400;
-const int SCR_HEIGHT = 800;
+const int SCR_WIDTH = 600;
+const int SCR_HEIGHT = 1000;
 const int BLOCK_SIZE = 40;
 
 struct block {
@@ -19,7 +19,7 @@ int max(int a, int b) { return a > b ? a : b; }
 int min(int a, int b) { return a < b ? a : b; }
 
 int main(void) {
-  InitWindow(SCR_WIDTH, SCR_HEIGHT, "かわいい c based tetris");
+  InitWindow(SCR_WIDTH, SCR_HEIGHT, "c based tetris");
   float timedownpressed = 0.;
   float timeleftpressed = 0.;
   float timerightpressed = 0.;
@@ -38,6 +38,64 @@ int main(void) {
     }
   }
 
+  struct block nextblock;
+  for (int i = 0; i < 4; i++) {
+    for (int o = 0; o < 4; o++) {
+      nextblock.grid[i][o] = 0;
+    }
+  }
+  int randnum = rand() % 7;
+  switch (randnum) {
+  case 0: // i
+    nextblock.grid[0][1] = 1;
+    nextblock.grid[1][1] = 1;
+    nextblock.grid[2][1] = 1;
+    nextblock.grid[3][1] = 1;
+    break;
+  case 1: // j
+    nextblock.grid[0][1] = 1;
+    nextblock.grid[1][1] = 1;
+    nextblock.grid[2][1] = 1;
+    nextblock.grid[2][2] = 1;
+    break;
+  case 2: // l
+    nextblock.grid[0][2] = 1;
+    nextblock.grid[0][1] = 1;
+    nextblock.grid[1][1] = 1;
+    nextblock.grid[2][1] = 1;
+    break;
+  case 3: // o
+    nextblock.grid[1][1] = 1;
+    nextblock.grid[1][2] = 1;
+    nextblock.grid[2][1] = 1;
+    nextblock.grid[2][2] = 1;
+    break;
+  case 4: // s
+    nextblock.grid[0][2] = 1;
+    nextblock.grid[1][1] = 1;
+    nextblock.grid[1][2] = 1;
+    nextblock.grid[2][1] = 1;
+    break;
+  case 5: // z
+    nextblock.grid[0][1] = 1;
+    nextblock.grid[1][1] = 1;
+    nextblock.grid[1][2] = 1;
+    nextblock.grid[2][2] = 1;
+    break;
+  case 6: // t
+    nextblock.grid[0][1] = 1;
+    nextblock.grid[1][1] = 1;
+    nextblock.grid[2][1] = 1;
+    nextblock.grid[1][2] = 1;
+    break;
+  default:
+    break;
+  }
+
+  nextblock.color = BLUE;
+  nextblock.pos.x = 0;
+  nextblock.pos.y = 0;
+
   int temparr[4][4];
   for (int i = 0; i < 4; i++) {
     for (int o = 0; o < 4; o++) {
@@ -47,16 +105,18 @@ int main(void) {
   int nocolcount = 0;
   bool newblockneeded = true;
   bool newblockneededcheck = false;
-  int randnum = 0;
   int filledlines = 0;
   bool canmove = true;
   int linechecked = 0;
+  int score = 0;
+  int linescleared = 0;
 
   srand(time(0));
 
   while (!WindowShouldClose()) {
 
     if (newblockneeded) {
+
       for (int i = 0; i < 4; i++) {
         for (int o = 0; o < 4; o++) {
           if (mainblock.grid[i][o] == 1) {
@@ -66,52 +126,61 @@ int main(void) {
           }
         }
       }
+
       mainblock.pos.x = 3;
-      mainblock.pos.y = 0;
+      mainblock.pos.y = -1;
       mainblock.color = BLUE;
+
+      for (int i = 0; i < 4; i++) {
+        for (int o = 0; o < 4; o++) {
+          mainblock.grid[i][o] = nextblock.grid[i][o];
+          nextblock.grid[i][o] = 0;
+        }
+      }
+
       randnum = rand() % 7;
       switch (randnum) {
       case 0: // i
-        mainblock.grid[0][1] = 1;
-        mainblock.grid[1][1] = 1;
-        mainblock.grid[2][1] = 1;
-        mainblock.grid[3][1] = 1;
+        nextblock.grid[0][1] = 1;
+        nextblock.grid[1][1] = 1;
+        nextblock.grid[2][1] = 1;
+        nextblock.grid[3][1] = 1;
         break;
       case 1: // j
-        mainblock.grid[0][1] = 1;
-        mainblock.grid[1][1] = 1;
-        mainblock.grid[2][1] = 1;
-        mainblock.grid[2][2] = 1;
+        nextblock.grid[0][1] = 1;
+        nextblock.grid[1][1] = 1;
+        nextblock.grid[2][1] = 1;
+        nextblock.grid[2][2] = 1;
         break;
       case 2: // l
-        mainblock.grid[0][2] = 1;
-        mainblock.grid[0][1] = 1;
-        mainblock.grid[1][1] = 1;
-        mainblock.grid[2][1] = 1;
+        nextblock.grid[0][2] = 1;
+        nextblock.grid[0][1] = 1;
+        nextblock.grid[1][1] = 1;
+        nextblock.grid[2][1] = 1;
         break;
       case 3: // o
-        mainblock.grid[1][1] = 1;
-        mainblock.grid[1][2] = 1;
-        mainblock.grid[2][1] = 1;
-        mainblock.grid[2][2] = 1;
+        nextblock.grid[1][1] = 1;
+        nextblock.grid[1][2] = 1;
+        nextblock.grid[2][1] = 1;
+        nextblock.grid[2][2] = 1;
         break;
       case 4: // s
-        mainblock.grid[0][2] = 1;
-        mainblock.grid[1][1] = 1;
-        mainblock.grid[1][2] = 1;
-        mainblock.grid[2][1] = 1;
+        nextblock.grid[0][2] = 1;
+        nextblock.grid[1][1] = 1;
+        nextblock.grid[1][2] = 1;
+        nextblock.grid[2][1] = 1;
         break;
       case 5: // z
-        mainblock.grid[0][1] = 1;
-        mainblock.grid[1][1] = 1;
-        mainblock.grid[1][2] = 1;
-        mainblock.grid[2][2] = 1;
+        nextblock.grid[0][1] = 1;
+        nextblock.grid[1][1] = 1;
+        nextblock.grid[1][2] = 1;
+        nextblock.grid[2][2] = 1;
         break;
       case 6: // t
-        mainblock.grid[0][1] = 1;
-        mainblock.grid[1][1] = 1;
-        mainblock.grid[2][1] = 1;
-        mainblock.grid[1][2] = 1;
+        nextblock.grid[0][1] = 1;
+        nextblock.grid[1][1] = 1;
+        nextblock.grid[2][1] = 1;
+        nextblock.grid[1][2] = 1;
         break;
       default:
         break;
@@ -240,7 +309,7 @@ int main(void) {
         mainblock.pos.y++;
       }
     }
-
+    linescleared = 0;
     for (int y = 0; y < 20; y++) {
       linechecked = 0;
       for (int x = 0; x < 10; x++) {
@@ -249,6 +318,7 @@ int main(void) {
         }
       }
       if (linechecked >= 10) {
+        linescleared++;
         for (int x = 0; x < 10; x++) {
           grid[x][y] = 0;
         }
@@ -259,6 +329,7 @@ int main(void) {
         }
       }
     }
+    score += pow(linescleared, 2) * 100;
 
     BeginDrawing();
     ClearBackground(BLACK);
@@ -266,8 +337,8 @@ int main(void) {
       for (int o = 0; o < 20; o++) {
         if (grid[i][o] == 1) {
 
-          DrawRectangle(i * BLOCK_SIZE, o * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE,
-                        BLUE);
+          DrawRectangle(i * BLOCK_SIZE, o * BLOCK_SIZE + 100, BLOCK_SIZE,
+                        BLOCK_SIZE, BLUE);
         } else if (grid[i][o] == 2) {
           DrawRectangle(i * BLOCK_SIZE, o * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE,
                         WHITE);
@@ -281,14 +352,28 @@ int main(void) {
       for (int o = 0; o < 4; o++) {
         if (mainblock.grid[i][o] == 1) {
           DrawRectangle((i + mainblock.pos.x) * BLOCK_SIZE,
-                        (o + mainblock.pos.y) * BLOCK_SIZE, BLOCK_SIZE,
+                        (o + mainblock.pos.y) * BLOCK_SIZE + 100, BLOCK_SIZE,
                         BLOCK_SIZE, mainblock.color);
         }
       }
     }
+    DrawRectangle(0, 0, 600, 100, GRAY);
+    DrawRectangle(400, 100, 200, 800, GRAY);
+    DrawRectangle(0, 900, 600, 100, GRAY);
+    DrawText("C Based Tetris!", 20, 20, 60, WHITE);
+    DrawText("Next Block:", 425, 400, 20, WHITE);
+    DrawRectangle(425, 425, 150, 150, BLACK);
+    for (int i = 0; i < 4; i++) {
+      for (int o = 0; o < 4; o++) {
+        if (nextblock.grid[i][o] == 1) {
+          DrawRectangle(i * 30 + 455, o * 30 + 455, 30, 30, nextblock.color);
+        }
+      }
+    }
+    DrawText(TextFormat("Score: %i", score), 20, 950, 40, WHITE);
+
     EndDrawing();
   }
-
   CloseWindow();
   return 0;
 }
