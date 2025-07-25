@@ -20,8 +20,11 @@ int min(int a, int b) { return a < b ? a : b; }
 
 int main(void) {
   InitWindow(SCR_WIDTH, SCR_HEIGHT, "かわいい c based tetris");
-  int starttime = GetTime();
-  int curtime = GetTime();
+  float timedownpressed = 0.;
+  float timeleftpressed = 0.;
+  float timerightpressed = 0.;
+  float movebuffer = 0.;
+  float timesince = 0.;
   int grid[10][20];
   for (int i = 0; i < 10; i++) {
     for (int o = 0; o < 20; o++) {
@@ -46,9 +49,6 @@ int main(void) {
   bool newblockneededcheck = false;
   int randnum = 0;
   int filledlines = 0;
-  int timeofblock = 0;
-  int cycle = 0;
-  int blockaddcycle = 0;
   bool canmove = true;
   int linechecked = 0;
 
@@ -118,8 +118,14 @@ int main(void) {
       }
       newblockneeded = false;
     }
-
-    if (IsKeyPressed(KEY_LEFT)) {
+    if (IsKeyDown(KEY_LEFT)) {
+      timeleftpressed += GetFrameTime();
+    } else {
+      timeleftpressed = 0.;
+    }
+    if (IsKeyPressed(KEY_LEFT) ||
+        (timeleftpressed > 0.3) && movebuffer >= 0.05) {
+      movebuffer = 0.;
       canmove = true;
       for (int i = 0; i < 4; i++) {
         for (int o = 0; o < 4; o++) {
@@ -135,7 +141,14 @@ int main(void) {
         mainblock.pos.x--;
       }
     }
-    if (IsKeyPressed(KEY_RIGHT)) {
+    if (IsKeyDown(KEY_RIGHT)) {
+      timerightpressed += GetFrameTime();
+    } else {
+      timerightpressed = 0.;
+    }
+    if (IsKeyPressed(KEY_RIGHT) ||
+        (timerightpressed > 0.3) && movebuffer >= 0.05) {
+      movebuffer = 0.;
       canmove = true;
       for (int i = 0; i < 4; i++) {
         for (int o = 0; o < 4; o++) {
@@ -151,8 +164,16 @@ int main(void) {
         mainblock.pos.x++;
       }
     }
-
-    if (IsKeyPressed(KEY_DOWN)) {
+    if (IsKeyDown(KEY_DOWN)) {
+      timedownpressed += GetFrameTime();
+    } else {
+      timedownpressed = 0.;
+    }
+    movebuffer += GetFrameTime();
+    if (IsKeyPressed(KEY_DOWN) ||
+        (timedownpressed > 0.3) && movebuffer >= 0.05) {
+      movebuffer = 0.;
+      timesince = 0.;
       canmove = true;
       for (int i = 0; i < 4; i++) {
         for (int o = 0; o < 4; o++) {
@@ -161,6 +182,7 @@ int main(void) {
                    0) ||
               (mainblock.grid[i][o] == 1 && o + mainblock.pos.y >= 19)) {
             canmove = false;
+            newblockneeded = true;
           }
         }
       }
@@ -177,8 +199,10 @@ int main(void) {
       nocolcount = 0;
       for (int i = 0; i < 4; i++) {
         for (int o = 0; o < 4; o++) {
-          if (temparr[i][o] == 1 &&
-              grid[i + (int)mainblock.pos.x][o + (int)mainblock.pos.y] == 0) {
+          if ((temparr[i][o] == 1 &&
+               grid[i + (int)mainblock.pos.x][o + (int)mainblock.pos.y] == 0) &&
+              (i + mainblock.pos.x <= 9 && i + mainblock.pos.x >= 0) &&
+              o + mainblock.pos.y <= 19) {
             nocolcount++;
           }
         }
@@ -191,8 +215,9 @@ int main(void) {
         }
       }
     }
-    if (cycle < GetTime()) {
-      cycle++;
+    timesince += GetFrameTime();
+    if (timesince > 1.) {
+      timesince = 0.;
       canmove = true;
 
       for (int i = 0; i < 4; i++) {
@@ -221,7 +246,6 @@ int main(void) {
       for (int x = 0; x < 10; x++) {
         if (grid[x][y] != 0) {
           linechecked++;
-          // printf("checking\n");
         }
       }
       if (linechecked >= 10) {
