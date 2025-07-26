@@ -13,6 +13,7 @@ struct block {
   int grid[4][4];
   Vector2 pos;
   int color;
+  int type;
 };
 
 int max(int a, int b) { return a > b ? a : b; }
@@ -26,7 +27,9 @@ int main(void) {
   float movebuffer = 0.;
   float timesince = 0.;
   int totallinescleared = 0;
+  Color tempcolor = BLUE;
   int grid[10][20];
+  srand(time(0));
   for (int i = 0; i < 10; i++) {
     for (int o = 0; o < 20; o++) {
       grid[i][o] = 0;
@@ -46,6 +49,7 @@ int main(void) {
     }
   }
   int randnum = rand() % 7;
+  nextblock.type = randnum;
   switch (randnum) {
   case 0: // i
     nextblock.grid[0][1] = 1;
@@ -114,8 +118,6 @@ int main(void) {
   float fallspeed = 1.;
   int level = 1;
 
-  srand(time(0));
-
   while (!WindowShouldClose()) {
 
     if (newblockneeded) {
@@ -155,6 +157,7 @@ int main(void) {
       }
 
       randnum = rand() % 7;
+      nextblock.type = randnum;
       switch (randnum) {
       case 0: // i
         nextblock.grid[0][1] = 1;
@@ -358,16 +361,21 @@ int main(void) {
     ClearBackground(BLACK);
     for (int i = 0; i < 10; i++) {
       for (int o = 0; o < 20; o++) {
-        if (grid[i][o] == 1) {
-
+        switch (grid[i][o]) {
+        case 1:
           DrawRectangle(i * BLOCK_SIZE, o * BLOCK_SIZE + 100, BLOCK_SIZE,
                         BLOCK_SIZE, BLUE);
-        } else if (grid[i][o] == 2) {
+          break;
+        case 2:
           DrawRectangle(i * BLOCK_SIZE, o * BLOCK_SIZE + 100, BLOCK_SIZE,
                         BLOCK_SIZE, WHITE);
-        } else if (grid[i][o] == 3) {
+          break;
+        case 3:
           DrawRectangle(i * BLOCK_SIZE, o * BLOCK_SIZE + 100, BLOCK_SIZE,
                         BLOCK_SIZE, RED);
+          break;
+        default:
+          break;
         }
       }
     }
@@ -376,23 +384,21 @@ int main(void) {
         if (mainblock.grid[i][o] == 1) {
           switch (mainblock.color) {
           case 1:
-            DrawRectangle((i + mainblock.pos.x) * BLOCK_SIZE,
-                          (o + mainblock.pos.y) * BLOCK_SIZE + 100, BLOCK_SIZE,
-                          BLOCK_SIZE, BLUE);
+            tempcolor = BLUE;
             break;
           case 2:
-            DrawRectangle((i + mainblock.pos.x) * BLOCK_SIZE,
-                          (o + mainblock.pos.y) * BLOCK_SIZE + 100, BLOCK_SIZE,
-                          BLOCK_SIZE, WHITE);
+            tempcolor = WHITE;
             break;
           case 3:
-            DrawRectangle((i + mainblock.pos.x) * BLOCK_SIZE,
-                          (o + mainblock.pos.y) * BLOCK_SIZE + 100, BLOCK_SIZE,
-                          BLOCK_SIZE, RED);
+            tempcolor = RED;
             break;
           default:
+            tempcolor = BLUE;
             break;
           }
+          DrawRectangle((i + mainblock.pos.x) * BLOCK_SIZE,
+                        (o + mainblock.pos.y) * BLOCK_SIZE + 100, BLOCK_SIZE,
+                        BLOCK_SIZE, tempcolor);
         }
       }
     }
@@ -402,21 +408,31 @@ int main(void) {
     DrawText("C Based Tetris!", 20, 20, 60, WHITE);
     DrawText("Next Block:", 425, 400, 20, WHITE);
     DrawRectangle(425, 425, 150, 150, BLACK);
+    switch (nextblock.color) {
+    case 1:
+      tempcolor = BLUE;
+      break;
+    case 2:
+      tempcolor = WHITE;
+      break;
+    case 3:
+      tempcolor = RED;
+      break;
+    default:
+      tempcolor = BLUE;
+      break;
+    }
     for (int i = 0; i < 4; i++) {
       for (int o = 0; o < 4; o++) {
         if (nextblock.grid[i][o] == 1) {
-          switch (nextblock.color) {
-          case 1:
-            DrawRectangle(i * 30 + 455, o * 30 + 455, 30, 30, BLUE);
-            break;
-          case 2:
-            DrawRectangle(i * 30 + 455, o * 30 + 455, 30, 30, WHITE);
-            break;
-          case 3:
-            DrawRectangle(i * 30 + 455, o * 30 + 455, 30, 30, RED);
-            break;
-          default:
-            break;
+          if (nextblock.type != 0 && nextblock.type != 3) {
+            DrawRectangle(i * 30 + 455, o * 30 + 440, 30, 30, tempcolor);
+          }
+          if (nextblock.type == 0) {
+            DrawRectangle(i * 30 + 440, o * 30 + 455, 30, 30, tempcolor);
+          }
+          if (nextblock.type == 3) {
+            DrawRectangle(i * 30 + 440, o * 30 + 440, 30, 30, tempcolor);
           }
         }
       }
