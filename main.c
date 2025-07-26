@@ -281,6 +281,31 @@ int main(void) {
     if (IsKeyPressed(KEY_Z)) {
       for (int i = 0; i < 4; i++) {
         for (int o = 0; o < 4; o++) {
+          temparr[i][o] = mainblock.grid[3 - o][i];
+        }
+      }
+      nocolcount = 0;
+      for (int i = 0; i < 4; i++) {
+        for (int o = 0; o < 4; o++) {
+          if ((temparr[i][o] == 1 &&
+               grid[i + (int)mainblock.pos.x][o + (int)mainblock.pos.y] == 0) &&
+              (i + mainblock.pos.x <= 9 && i + mainblock.pos.x >= 0) &&
+              o + mainblock.pos.y <= 19) {
+            nocolcount++;
+          }
+        }
+      }
+      if (nocolcount >= 4) {
+        for (int i = 0; i < 4; i++) {
+          for (int o = 0; o < 4; o++) {
+            mainblock.grid[i][o] = temparr[i][o];
+          }
+        }
+      }
+    }
+    if (IsKeyPressed(KEY_X)) {
+      for (int i = 0; i < 4; i++) {
+        for (int o = 0; o < 4; o++) {
           temparr[3 - o][i] = mainblock.grid[i][o];
         }
       }
