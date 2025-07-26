@@ -12,7 +12,7 @@ const int BLOCK_SIZE = 40;
 struct block {
   int grid[4][4];
   Vector2 pos;
-  Color color;
+  int color;
 };
 
 int max(int a, int b) { return a > b ? a : b; }
@@ -25,6 +25,7 @@ int main(void) {
   float timerightpressed = 0.;
   float movebuffer = 0.;
   float timesince = 0.;
+  int totallinescleared = 0;
   int grid[10][20];
   for (int i = 0; i < 10; i++) {
     for (int o = 0; o < 20; o++) {
@@ -92,7 +93,7 @@ int main(void) {
     break;
   }
 
-  nextblock.color = BLUE;
+  nextblock.color = 1;
   nextblock.pos.x = 0;
   nextblock.pos.y = 0;
 
@@ -110,6 +111,8 @@ int main(void) {
   int linechecked = 0;
   int score = 0;
   int linescleared = 0;
+  float fallspeed = 1.;
+  int level = 1;
 
   srand(time(0));
 
@@ -120,8 +123,19 @@ int main(void) {
       for (int i = 0; i < 4; i++) {
         for (int o = 0; o < 4; o++) {
           if (mainblock.grid[i][o] == 1) {
-            grid[i + (int)mainblock.pos.x][o + (int)mainblock.pos.y] =
-                mainblock.grid[i][o];
+            switch (mainblock.color) {
+            case 1:
+              grid[i + (int)mainblock.pos.x][o + (int)mainblock.pos.y] = 1;
+              break;
+            case 2:
+              grid[i + (int)mainblock.pos.x][o + (int)mainblock.pos.y] = 2;
+              break;
+            case 3:
+              grid[i + (int)mainblock.pos.x][o + (int)mainblock.pos.y] = 3;
+              break;
+            default:
+              break;
+            }
             mainblock.grid[i][o] = 0;
           }
         }
@@ -129,7 +143,9 @@ int main(void) {
 
       mainblock.pos.x = 3;
       mainblock.pos.y = -1;
-      mainblock.color = BLUE;
+      mainblock.color = nextblock.color;
+
+      nextblock.color = (rand() % 3) + 1;
 
       for (int i = 0; i < 4; i++) {
         for (int o = 0; o < 4; o++) {
@@ -284,8 +300,9 @@ int main(void) {
         }
       }
     }
+
     timesince += GetFrameTime();
-    if (timesince > 1.) {
+    if (timesince > fallspeed) {
       timesince = 0.;
       canmove = true;
 
@@ -330,6 +347,12 @@ int main(void) {
       }
     }
     score += pow(linescleared, 2) * 100;
+    totallinescleared += linescleared;
+    if (totallinescleared >= 10) {
+      fallspeed = fallspeed / 2.;
+      level++;
+      totallinescleared = 0;
+    }
 
     BeginDrawing();
     ClearBackground(BLACK);
@@ -340,20 +363,36 @@ int main(void) {
           DrawRectangle(i * BLOCK_SIZE, o * BLOCK_SIZE + 100, BLOCK_SIZE,
                         BLOCK_SIZE, BLUE);
         } else if (grid[i][o] == 2) {
-          DrawRectangle(i * BLOCK_SIZE, o * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE,
-                        WHITE);
+          DrawRectangle(i * BLOCK_SIZE, o * BLOCK_SIZE + 100, BLOCK_SIZE,
+                        BLOCK_SIZE, WHITE);
         } else if (grid[i][o] == 3) {
-          DrawRectangle(i * BLOCK_SIZE, o * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE,
-                        RED);
+          DrawRectangle(i * BLOCK_SIZE, o * BLOCK_SIZE + 100, BLOCK_SIZE,
+                        BLOCK_SIZE, RED);
         }
       }
     }
     for (int i = 0; i < 4; i++) {
       for (int o = 0; o < 4; o++) {
         if (mainblock.grid[i][o] == 1) {
-          DrawRectangle((i + mainblock.pos.x) * BLOCK_SIZE,
-                        (o + mainblock.pos.y) * BLOCK_SIZE + 100, BLOCK_SIZE,
-                        BLOCK_SIZE, mainblock.color);
+          switch (mainblock.color) {
+          case 1:
+            DrawRectangle((i + mainblock.pos.x) * BLOCK_SIZE,
+                          (o + mainblock.pos.y) * BLOCK_SIZE + 100, BLOCK_SIZE,
+                          BLOCK_SIZE, BLUE);
+            break;
+          case 2:
+            DrawRectangle((i + mainblock.pos.x) * BLOCK_SIZE,
+                          (o + mainblock.pos.y) * BLOCK_SIZE + 100, BLOCK_SIZE,
+                          BLOCK_SIZE, WHITE);
+            break;
+          case 3:
+            DrawRectangle((i + mainblock.pos.x) * BLOCK_SIZE,
+                          (o + mainblock.pos.y) * BLOCK_SIZE + 100, BLOCK_SIZE,
+                          BLOCK_SIZE, RED);
+            break;
+          default:
+            break;
+          }
         }
       }
     }
@@ -366,11 +405,24 @@ int main(void) {
     for (int i = 0; i < 4; i++) {
       for (int o = 0; o < 4; o++) {
         if (nextblock.grid[i][o] == 1) {
-          DrawRectangle(i * 30 + 455, o * 30 + 455, 30, 30, nextblock.color);
+          switch (nextblock.color) {
+          case 1:
+            DrawRectangle(i * 30 + 455, o * 30 + 455, 30, 30, BLUE);
+            break;
+          case 2:
+            DrawRectangle(i * 30 + 455, o * 30 + 455, 30, 30, WHITE);
+            break;
+          case 3:
+            DrawRectangle(i * 30 + 455, o * 30 + 455, 30, 30, RED);
+            break;
+          default:
+            break;
+          }
         }
       }
     }
     DrawText(TextFormat("Score: %i", score), 20, 950, 40, WHITE);
+    DrawText(TextFormat("Level: %i", level), 420, 200, 35, WHITE);
 
     EndDrawing();
   }
