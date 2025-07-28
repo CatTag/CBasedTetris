@@ -1,0 +1,3 @@
+#!/bin/bash
+clang -I$(brew --prefix raylib)"/include" -L$(brew --prefix raylib)"/lib" -lraylib main.c
+./a.out

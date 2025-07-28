@@ -117,6 +117,7 @@ int main(void) {
   int linescleared = 0;
   float fallspeed = 1.;
   int level = 1;
+  bool paused = false;
 
   while (!WindowShouldClose()) {
 
@@ -206,13 +207,13 @@ int main(void) {
       }
       newblockneeded = false;
     }
-    if (IsKeyDown(KEY_LEFT)) {
+    if (IsKeyDown(KEY_LEFT) && !paused) {
       timeleftpressed += GetFrameTime();
     } else {
       timeleftpressed = 0.;
     }
-    if (IsKeyPressed(KEY_LEFT) ||
-        (timeleftpressed > 0.3) && movebuffer >= 0.05) {
+    if ((IsKeyPressed(KEY_LEFT) ||
+        (timeleftpressed > 0.3) && movebuffer >= 0.05) && !paused) {
       movebuffer = 0.;
       canmove = true;
       for (int i = 0; i < 4; i++) {
@@ -229,13 +230,13 @@ int main(void) {
         mainblock.pos.x--;
       }
     }
-    if (IsKeyDown(KEY_RIGHT)) {
+    if (IsKeyDown(KEY_RIGHT) && !paused) {
       timerightpressed += GetFrameTime();
     } else {
       timerightpressed = 0.;
     }
-    if (IsKeyPressed(KEY_RIGHT) ||
-        (timerightpressed > 0.3) && movebuffer >= 0.05) {
+    if ((IsKeyPressed(KEY_RIGHT) ||
+        (timerightpressed > 0.3) && movebuffer >= 0.05) && !paused) {
       movebuffer = 0.;
       canmove = true;
       for (int i = 0; i < 4; i++) {
@@ -252,14 +253,14 @@ int main(void) {
         mainblock.pos.x++;
       }
     }
-    if (IsKeyDown(KEY_DOWN)) {
+    if (IsKeyDown(KEY_DOWN) && !paused) {
       timedownpressed += GetFrameTime();
     } else {
       timedownpressed = 0.;
     }
     movebuffer += GetFrameTime();
-    if (IsKeyPressed(KEY_DOWN) ||
-        (timedownpressed > 0.3) && movebuffer >= 0.05) {
+    if ((IsKeyPressed(KEY_DOWN) ||
+        (timedownpressed > 0.3) && movebuffer >= 0.05) && !paused) {
       movebuffer = 0.;
       timesince = 0.;
       canmove = true;
@@ -278,7 +279,7 @@ int main(void) {
         mainblock.pos.y++;
       }
     }
-    if (IsKeyPressed(KEY_Z)) {
+    if (IsKeyPressed(KEY_Z) && !paused) {
       for (int i = 0; i < 4; i++) {
         for (int o = 0; o < 4; o++) {
           temparr[i][o] = mainblock.grid[3 - o][i];
@@ -303,7 +304,7 @@ int main(void) {
         }
       }
     }
-    if (IsKeyPressed(KEY_X)) {
+    if (IsKeyPressed(KEY_X) && !paused) {
       for (int i = 0; i < 4; i++) {
         for (int o = 0; o < 4; o++) {
           temparr[3 - o][i] = mainblock.grid[i][o];
@@ -329,7 +330,17 @@ int main(void) {
       }
     }
 
-    timesince += GetFrameTime();
+    if (IsKeyPressed(KEY_SPACE)) {
+      if (paused) {
+        paused = false;
+      } else {
+        paused = true;
+      }
+    }
+
+    if (!paused) {
+      timesince += GetFrameTime();
+    }
     if (timesince > fallspeed) {
       timesince = 0.;
       canmove = true;
@@ -464,6 +475,9 @@ int main(void) {
     }
     DrawText(TextFormat("Score: %i", score), 20, 950, 40, WHITE);
     DrawText(TextFormat("Level: %i", level), 420, 200, 35, WHITE);
+    if (paused) {
+      DrawText("Paused!", 22, 465, 40, GREEN);
+    }
 
     EndDrawing();
   }
