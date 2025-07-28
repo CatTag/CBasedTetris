@@ -4,7 +4,9 @@ It is not very high quality but it has a simple "UI" but it functions as Tetris.
 
 # Controls
 Left, Right, and Down arrows to move the block and you can also hold them.                            
-Z and X to rotate.                                                                    
+Z and X to rotate.                                                                  Space to pause.                                                                         
+
+
 
 # Build guide
 Linux/MacOS:                                                                            
